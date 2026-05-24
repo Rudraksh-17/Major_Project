@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 # Load CNN model
-model = load_model("../model/drowsiness_cnn.h5")
+model = load_model("model/drowsiness_cnn.h5")
 
 
 def detect_drowsiness(image_path):
