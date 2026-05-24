@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 
 # Load model and scaler
-model = load_model("../model/TA_model.keras")
+model = load_model("model/TA_model.keras")
 
-scaler = joblib.load("../model/scaler.pkl")
+scaler = joblib.load("model/scaler.pkl")
 
 
 def predict_risk(
