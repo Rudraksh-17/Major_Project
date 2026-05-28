@@ -165,7 +165,7 @@ with col1:
         with open("temp_video.mp4", "wb") as f:
             f.write(uploaded_video.read())
 
-        st.video(output_video)
+        
 
     else:
 
@@ -184,6 +184,7 @@ with col1:
 
     if uploaded_video is not None:
         vehicle_count, traffic_density, output_video = detect_traffic("temp_video.mp4")
+        st.video(output_video)
     else:
         vehicle_count = 0
         traffic_density = 0.1
