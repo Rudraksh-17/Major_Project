@@ -165,7 +165,7 @@ with col1:
         with open("temp_video.mp4", "wb") as f:
             f.write(uploaded_video.read())
 
-        st.video("output_video")
+        st.video(output_video)
 
     else:
 
