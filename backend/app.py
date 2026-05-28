@@ -229,20 +229,20 @@ with col2:
         # =========================
 
         overall_risk = (
-            prediction * 0.5 +
+            prediction * 0.4 +
             traffic_density * 0.3 +
-            drowsiness_score * 0.2
+            drowsiness_score * 0.3
         )
 
         # =========================
         # RISK CLASSIFICATION
         # =========================
 
-        if overall_risk < 0.4:
+        if overall_risk < 0.3:
             risk_level = "LOW"
             risk_class = "risk-low"
 
-        elif overall_risk < 0.7:
+        elif overall_risk < 0.5:
             risk_level = "MEDIUM"
             risk_class = "risk-medium"
 
