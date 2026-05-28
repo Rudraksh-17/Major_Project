@@ -183,7 +183,7 @@ with col1:
     # =========================
 
     if uploaded_video is not None:
-        vehicle_count, traffic_density = detect_traffic("temp_video.mp4")
+        vehicle_count, traffic_density, output_video = detect_traffic("temp_video.mp4")
     else:
         vehicle_count = 0
         traffic_density = 0.1
