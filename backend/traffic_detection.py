@@ -1,7 +1,6 @@
 from ultralytics import YOLO
 import cv2
 
-# Load YOLO model
 model = YOLO("yolov8n.pt")
 
 
@@ -14,7 +13,7 @@ def detect_traffic(video_path):
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-    # Save processed output
+    # Output video
     output_path = "output_traffic.mp4"
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -27,7 +26,7 @@ def detect_traffic(video_path):
     )
 
     total_vehicles = 0
-    frame_count = 0
+    processed_frames = 0
 
     while cap.isOpened():
 
@@ -36,9 +35,12 @@ def detect_traffic(video_path):
         if not ret:
             break
 
-        frame_count += 1
+        processed_frames += 1
 
-        # Run YOLO
+        # Skip frames for speed
+        if processed_frames % 10 != 0:
+            continue
+
         results = model(frame)
 
         vehicle_count = 0
@@ -47,17 +49,16 @@ def detect_traffic(video_path):
 
         for r in results:
 
-            boxes = r.boxes
-
-            for box in boxes:
+            for box in r.boxes:
 
                 cls = int(box.cls[0])
 
-                # Vehicle classes
+                # COCO vehicle classes
                 if cls in [2, 3, 5, 7]:
 
                     vehicle_count += 1
 
+                    # Bounding box coordinates
                     x1, y1, x2, y2 = map(
                         int,
                         box.xyxy[0]
@@ -76,7 +77,7 @@ def detect_traffic(video_path):
                         2
                     )
 
-                    # Put label
+                    # Draw label
                     cv2.putText(
                         annotated_frame,
                         label,
@@ -89,14 +90,15 @@ def detect_traffic(video_path):
 
         total_vehicles += vehicle_count
 
-        # Write processed frame
+        # Save annotated frame
         out.write(annotated_frame)
 
     cap.release()
     out.release()
 
-    avg_vehicles = total_vehicles / max(frame_count, 1)
+    avg_vehicles = total_vehicles / max(processed_frames, 1)
 
+    # Density calculation
     traffic_density = min(avg_vehicles / 20, 1.0)
 
     return avg_vehicles, traffic_density, output_path
