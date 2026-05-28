@@ -1,24 +1,26 @@
+# =========================
+# app.py
+# =========================
+
 import keras
 from keras.layers import Dense
 
-
-
-# Capture the original initialization method
+# Patch for keras compatibility
 original_init = Dense.__init__
 
-# Define a patched initialization that filters out the breaking argument
+
 def patched_init(self, *args, **kwargs):
-    kwargs.pop("quantization_config", None)  # Safely strip the key if present
+    kwargs.pop("quantization_config", None)
     return original_init(self, *args, **kwargs)
 
-# Overwrite the default Keras Dense layer initialization logic
+
 Dense.__init__ = patched_init
 
 import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# Import custom modules
+# Custom modules
 from traffic_detection import detect_traffic
 from risk_predictor import predict_risk
 from Drowsiness_detector import detect_drowsiness
@@ -135,16 +137,27 @@ curvature = st.sidebar.slider(
     0.3
 )
 
+# =========================
+# EYE IMAGE UPLOAD
+# =========================
+
 uploaded_eye = st.sidebar.file_uploader(
     "Upload Eye Image",
     type=["jpg", "jpeg", "png"]
 )
+
+# =========================
+# VIDEO UPLOAD
+# =========================
+
 uploaded_video = st.sidebar.file_uploader(
     "Upload Traffic Video",
     type=["mp4", "avi", "mov"]
 )
-drowsiness_score = 0.0
+
 predict_button = st.sidebar.button("Predict Risk")
+
+drowsiness_score = 0.0
 
 # =========================
 # MAIN LAYOUT
@@ -160,12 +173,16 @@ with col1:
 
     st.subheader("📹 Traffic Monitoring Feed")
 
+    # =========================
+    # VIDEO DISPLAY
+    # =========================
+
     if uploaded_video is not None:
 
         with open("temp_video.mp4", "wb") as f:
             f.write(uploaded_video.read())
 
-        
+        st.video("temp_video.mp4")
 
     else:
 
@@ -183,13 +200,20 @@ with col1:
     # =========================
 
     if uploaded_video is not None:
-        vehicle_count, traffic_density, output_video = detect_traffic("temp_video.mp4")
-        st.video(output_video)
+
+        vehicle_count, traffic_density = detect_traffic(
+            "temp_video.mp4"
+        )
+
     else:
+
         vehicle_count = 0
         traffic_density = 0.1
 
-    # Density label
+    # =========================
+    # TRAFFIC LABEL
+    # =========================
+
     if traffic_density < 0.4:
         traffic_label = "Low"
 
@@ -233,17 +257,21 @@ with col2:
             traffic_density=traffic_density
         )
 
+        # =========================
+        # DROWSINESS DETECTION
+        # =========================
+
         if uploaded_eye is not None:
 
             with open("temp_eye.jpg", "wb") as f:
                 f.write(uploaded_eye.read())
 
-            # =========================
-            # Run drowsiness detection after saving the uploaded image
-            drowsiness_score = detect_drowsiness("temp_eye.jpg")
+            drowsiness_score = detect_drowsiness(
+                "temp_eye.jpg"
+            )
 
         # =========================
-        # HYBRID RISK CALCULATION
+        # HYBRID RISK
         # =========================
 
         overall_risk = (
@@ -257,14 +285,17 @@ with col2:
         # =========================
 
         if overall_risk < 0.3:
+
             risk_level = "LOW"
             risk_class = "risk-low"
 
         elif overall_risk < 0.5:
+
             risk_level = "MEDIUM"
             risk_class = "risk-medium"
 
         else:
+
             risk_level = "HIGH"
             risk_class = "risk-high"
 
@@ -286,7 +317,7 @@ with col2:
         st.progress(float(min(overall_risk, 1.0)))
 
         st.metric(
-            " Overall Risk Probability",
+            "Overall Risk Probability",
             f"{overall_risk:.2f}"
         )
 
@@ -314,20 +345,23 @@ st.markdown("---")
 st.subheader("🗂️ Prediction History")
 
 history_data = pd.DataFrame({
+
     "Time": [
         datetime.now().strftime("%H:%M:%S")
     ],
+
     "Weather": [weather],
+
     "Road Type": [road_type],
+
     "Traffic Density": [traffic_label],
+
     "Risk": [
         risk_level if predict_button else "Not Predicted"
     ]
 })
 
-st.dataframe(history_data, use_container_width=True)
-
-uploaded_eye = st.file_uploader(
-    "Upload Driver Eye Image",
-    type=["jpg", "png", "jpeg"]
+st.dataframe(
+    history_data,
+    use_container_width=True
 )
