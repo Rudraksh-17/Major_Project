@@ -275,8 +275,8 @@ with col2:
         # =========================
 
         overall_risk = (
-            prediction * 0.4 +
-            traffic_density * 0.3 +
+            prediction * 0.3 +
+            traffic_density * 0.4 +
             drowsiness_score * 0.3
         )
 
