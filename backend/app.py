@@ -186,7 +186,7 @@ else:
 
     vehicle_count, traffic_density = detect_traffic("temp_video.mp4")
 
-else:
+    else:
 
     vehicle_count = 0
     traffic_density = 0.1
