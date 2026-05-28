@@ -160,7 +160,7 @@ with col1:
 
     st.subheader("📹 Traffic Monitoring Feed")
 
-    if uploaded_video is not None:
+if uploaded_video is not None:
 
     with open("temp_video.mp4", "wb") as f:
         f.write(uploaded_video.read())
