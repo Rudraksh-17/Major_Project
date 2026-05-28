@@ -160,19 +160,19 @@ with col1:
 
     st.subheader("📹 Traffic Monitoring Feed")
 
-if uploaded_video is not None:
+    if uploaded_video is not None:
 
-    with open("temp_video.mp4", "wb") as f:
-        f.write(uploaded_video.read())
+        with open("temp_video.mp4", "wb") as f:
+            f.write(uploaded_video.read())
 
-    st.video("temp_video.mp4")
+        st.video("temp_video.mp4")
 
-else:
+    else:
 
-    st.image(
-        "https://images.unsplash.com/photo-1502877338535-766e1452684a",
-        use_container_width=True
-    )
+        st.image(
+            "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+            use_container_width=True
+        )
 
     st.markdown("---")
 
@@ -183,13 +183,11 @@ else:
     # =========================
 
     if uploaded_video is not None:
-
-    vehicle_count, traffic_density = detect_traffic("temp_video.mp4")
-
+        vehicle_count, traffic_density = detect_traffic("temp_video.mp4")
     else:
+        vehicle_count = 0
+        traffic_density = 0.1
 
-    vehicle_count = 0
-    traffic_density = 0.1
     # Density label
     if traffic_density < 0.4:
         traffic_label = "Low"
@@ -243,8 +241,8 @@ with col2:
             # Run drowsiness detection after saving the uploaded image
             drowsiness_score = detect_drowsiness("temp_eye.jpg")
 
-            # =========================
-            # HYBRID RISK CALCULATION
+        # =========================
+        # HYBRID RISK CALCULATION
         # =========================
 
         overall_risk = (
@@ -328,4 +326,7 @@ history_data = pd.DataFrame({
 
 st.dataframe(history_data, use_container_width=True)
 
-
+uploaded_eye = st.file_uploader(
+    "Upload Driver Eye Image",
+    type=["jpg", "png", "jpeg"]
+)
