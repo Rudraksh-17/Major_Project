@@ -139,6 +139,10 @@ uploaded_eye = st.sidebar.file_uploader(
     "Upload Eye Image",
     type=["jpg", "jpeg", "png"]
 )
+uploaded_video = st.sidebar.file_uploader(
+    "Upload Traffic Video",
+    type=["mp4", "avi", "mov"]
+)
 drowsiness_score = 0.0
 predict_button = st.sidebar.button("Predict Risk")
 
@@ -156,6 +160,15 @@ with col1:
 
     st.subheader("📹 Traffic Monitoring Feed")
 
+    if uploaded_video is not None:
+
+    with open("temp_video.mp4", "wb") as f:
+        f.write(uploaded_video.read())
+
+    st.video("temp_video.mp4")
+
+else:
+
     st.image(
         "https://images.unsplash.com/photo-1502877338535-766e1452684a",
         use_container_width=True
@@ -169,8 +182,14 @@ with col1:
     # YOLO DETECTION
     # =========================
 
-    vehicle_count, traffic_density = detect_traffic("traffic.mp4")
+    if uploaded_video is not None:
 
+    vehicle_count, traffic_density = detect_traffic("temp_video.mp4")
+
+else:
+
+    vehicle_count = 0
+    traffic_density = 0.1
     # Density label
     if traffic_density < 0.4:
         traffic_label = "Low"
@@ -309,7 +328,4 @@ history_data = pd.DataFrame({
 
 st.dataframe(history_data, use_container_width=True)
 
-uploaded_eye = st.file_uploader(
-    "Upload Driver Eye Image",
-    type=["jpg", "png", "jpeg"]
-)
+
