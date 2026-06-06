@@ -2,6 +2,8 @@
 # app.py
 # =========================
 
+import os
+
 import keras
 from keras.layers import Dense
 
@@ -18,6 +20,7 @@ Dense.__init__ = patched_init
 
 import streamlit as st
 import pandas as pd
+from PIL import Image
 from datetime import datetime
 
 # Custom modules
@@ -90,7 +93,13 @@ h1, h2, h3, h4 {
     font-size: 32px;
     font-weight: bold;
 }
-
+.media-box {
+    border-radius: 15px;
+    background-color: #111827;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -98,9 +107,27 @@ h1, h2, h3, h4 {
 # HEADER
 # =========================
 
-st.title("🚗 AI Transportation Risk Analysis System")
+st.markdown("""
+<div style="
+padding:20px;
+border-radius:20px;
+background:linear-gradient(90deg,#111827,#1f2937);
+text-align:center;
+">
 
-st.markdown("---")
+<h1 style="color:white;">
+AADMTA-AI Assisted Driver Monitoring and Traffic Analytics
+</h1>
+
+<p style="color:#9ca3af;font-size:18px;">
+AI Tribrid Transportation Safety Platform
+</p>
+
+</div>
+""",
+unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 # =========================
 # SIDEBAR INPUTS
@@ -158,24 +185,55 @@ uploaded_video = st.sidebar.file_uploader(
 predict_button = st.sidebar.button("Predict Risk")
 
 drowsiness_score = 0.0
+risk_level = "Not Predicted"
+risk_class = "risk-low"
+overall_risk = 0.0
 
 # =========================
 # MAIN LAYOUT
 # =========================
+k1,k2,k3,k4 = st.columns(4)
 
-col1, col2 = st.columns([2, 1])
+with k1:
+    st.metric(
+        "CNN Model",
+        "ACTIVE"
+    )
+
+with k2:
+    st.metric(
+        "YOLO Model",
+        "ACTIVE"
+    )
+
+with k3:
+    st.metric(
+        "ANN Model",
+        "ACTIVE"
+    )
+
+with k4:
+    st.metric(
+        "System",
+        "ONLINE"
+    )
+media_col1, media_col2 = st.columns([1,1], gap="large")
 
 # =========================
 # LEFT PANEL
 # =========================
 
-with col1:
+# =========================
+# MEDIA SECTION
+# =========================
 
-    st.subheader("📹 Traffic Monitoring Feed")
+with media_col1:
 
-    # =========================
-    # VIDEO DISPLAY
-    # =========================
+    st.markdown("""
+    <div class="media-box">
+    <h3>📹 Traffic Monitoring</h3>
+    </div>
+    """, unsafe_allow_html=True)
 
     if uploaded_video is not None:
 
@@ -186,67 +244,105 @@ with col1:
 
     else:
 
+        st.info(
+            "Upload a traffic video for vehicle detection."
+        )
+
+with media_col2:
+
+    st.markdown("""
+    <div class="media-box">
+    <h3>👁 Driver Monitoring</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if uploaded_eye is not None:
+
+        uploaded_eye.seek(0)
+
+        image = Image.open(uploaded_eye)
+
         st.image(
-            "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+            image,
             use_container_width=True
         )
 
-    st.markdown("---")
+    else:
 
-    st.subheader("📊 Traffic Statistics")
-
-    # =========================
-    # YOLO DETECTION
-    # =========================
-
-    if uploaded_video is not None:
-
-        vehicle_count, traffic_density = detect_traffic(
-            "temp_video.mp4"
+        st.info(
+            "Upload a driver eye image."
         )
 
-    else:
+# =========================
+# TRAFFIC PROCESSING
+# =========================
 
-        vehicle_count = 0
-        traffic_density = 0.1
+if uploaded_video is not None:
 
-    # =========================
-    # TRAFFIC LABEL
-    # =========================
+    vehicle_count, traffic_density = detect_traffic(
+        "temp_video.mp4"
+    )
 
-    if traffic_density < 0.4:
-        traffic_label = "Low"
+else:
 
-    elif traffic_density < 0.7:
-        traffic_label = "Medium"
+    vehicle_count = 0
+    traffic_density = 0.1
 
-    else:
-        traffic_label = "High"
+if traffic_density < 0.4:
+    traffic_label = "Low"
+
+elif traffic_density < 0.7:
+    traffic_label = "Medium"
+
+else:
+    traffic_label = "High"
+
+# =========================
+# ANALYTICS SECTION
+# =========================
+
+analytics_col1, analytics_col2 = st.columns(2)
+
+with analytics_col1:
+
+    st.subheader("📊 Traffic Intelligence")
 
     stat1, stat2, stat3 = st.columns(3)
 
     with stat1:
-        st.metric("Vehicle Count", vehicle_count)
+        st.metric(
+            "Vehicle Count",
+            vehicle_count
+        )
 
     with stat2:
-        st.metric("Traffic Density", traffic_label)
+        st.metric(
+            "Traffic Density",
+            traffic_label
+        )
 
     with stat3:
-        st.metric("System Status", "Active")
+        st.metric(
+            "System Status",
+            "Active"
+        )
 
-# =========================
-# RIGHT PANEL
-# =========================
+with analytics_col2:
 
-with col2:
-
-    st.subheader("🧠 AI Risk Analysis")
+    st.markdown("""
+    <div style="
+    background:#111827;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:15px;
+    ">
+    <h3 style="color:white;">
+    🧠 Transportation Risk Engine
+    </h3>
+    </div>
+    """, unsafe_allow_html=True)
 
     if predict_button:
-
-        # =========================
-        # ANN PREDICTION
-        # =========================
 
         prediction = predict_risk(
             speed_limit=speed_limit,
@@ -257,32 +353,20 @@ with col2:
             traffic_density=traffic_density
         )
 
-        # =========================
-        # DROWSINESS DETECTION
-        # =========================
-
         if uploaded_eye is not None:
+            uploaded_eye.seek(0)
 
+            image_bytes = uploaded_eye.getvalue()
             with open("temp_eye.jpg", "wb") as f:
-                f.write(uploaded_eye.read())
-
-            drowsiness_score = detect_drowsiness(
-                "temp_eye.jpg"
-            )
-
-        # =========================
-        # HYBRID RISK
-        # =========================
+                f.write(image_bytes)
+                drowsiness_score = detect_drowsiness("temp_eye.jpg")
+    
 
         overall_risk = (
             prediction * 0.3 +
             traffic_density * 0.4 +
             drowsiness_score * 0.3
         )
-
-        # =========================
-        # RISK CLASSIFICATION
-        # =========================
 
         if overall_risk < 0.3:
 
@@ -299,10 +383,6 @@ with col2:
             risk_level = "HIGH"
             risk_class = "risk-high"
 
-        # =========================
-        # DISPLAY RESULTS
-        # =========================
-
         st.markdown(f"""
         <div class="metric-card">
             <h2>Predicted Risk</h2>
@@ -312,9 +392,11 @@ with col2:
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("### 📈 Risk Score")
+        st.markdown("### 📈 Hybrid Risk Score")
 
-        st.progress(float(min(overall_risk, 1.0)))
+        st.progress(
+            float(min(overall_risk, 1.0))
+        )
 
         st.metric(
             "Overall Risk Probability",
@@ -336,6 +418,7 @@ with col2:
             lighting
         )
 
+        
 # =========================
 # PREDICTION HISTORY
 # =========================
